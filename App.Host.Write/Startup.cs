@@ -3,8 +3,6 @@ using System.Transactions;
 using App.Host.Read.Consumer;
 using App.Host.Read.Context;
 using App.Host.Write.Context;
-using GreenPipes;
-using GreenPipes.Introspection;
 using MassTransit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -37,7 +35,7 @@ namespace App.Host.Write
 
 
             var db = services.BuildServiceProvider().GetRequiredService<ApplicationReadDbContext>();
- 
+
 
             var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
             {
@@ -50,7 +48,6 @@ namespace App.Host.Write
 
                 cfg.ReceiveEndpoint(e =>
                 {
- 
                     e.UseTransaction(x =>
                     {
                         x.Timeout = TimeSpan.FromSeconds(90);
@@ -59,14 +56,13 @@ namespace App.Host.Write
 
                     e.Consumer(() => new WeatherForecastConsumer(db), c =>
                     {
-                   
+
                     });
                 });
             });
             services.AddSingleton(busControl);
             services.AddSingleton<IBus>(busControl);
             busControl.StartAsync();
- 
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

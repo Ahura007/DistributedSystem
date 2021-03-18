@@ -1,10 +1,8 @@
 ﻿using System;
-using System.IO;
 using System.Threading.Tasks;
 using System.Transactions;
 using App.Host.Read.Context;
 using Common;
-using GreenPipes;
 using MassTransit;
 
 namespace App.Host.Read.Consumer
@@ -23,27 +21,22 @@ namespace App.Host.Read.Consumer
             TransactionContext transactionContext;
             context.TryGetPayload(out transactionContext);
 
-            var message = context.Message;
 
-   
-            var a = transactionContext.Transaction.TransactionInformation.Status;
-
-
-            using (var scope = context.CreateTransactionScope(TimeSpan.FromMinutes(90)))
+            using var scope = context.CreateTransactionScope(TimeSpan.FromSeconds(10));
+            try
             {
-                try
-                {
-                    scope.Complete();
-                }
-                catch (Exception e)
-                {
-                    scope.Dispose();
-                    Console.WriteLine(e);
-                    throw;
-                }
+                scope.Complete();
             }
-
-            var b = transactionContext.Transaction.TransactionInformation.Status;
+            catch (TransactionAbortedException e)
+            {
+                
+            }
+            catch (Exception e)
+            {
+                scope.Dispose();
+                Console.WriteLine(e);
+                throw;
+            }
         }
     }
 }
