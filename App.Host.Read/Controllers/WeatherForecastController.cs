@@ -23,7 +23,7 @@ namespace App.Host.Read.Controllers
         }
 
         [HttpGet]
-        public async Task<IEnumerable<WeatherForecast>> Get()
+        public async Task<IEnumerable<WeatherForecast>> GetAsync()
         {
             return await _applicationReadDbContext.WeatherForecasts.ToListAsync();
         }

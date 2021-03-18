@@ -4,6 +4,7 @@ using App.Host.Read.Consumer;
 using App.Host.Read.Context;
 using App.Host.Write.Context;
 using MassTransit;
+using MassTransit.AspNetCoreIntegration;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -22,7 +23,7 @@ namespace App.Host.Write
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
+
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
@@ -32,9 +33,6 @@ namespace App.Host.Write
 
             services.AddDbContext<ApplicationReadDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-
-
-            var db = services.BuildServiceProvider().GetRequiredService<ApplicationReadDbContext>();
 
 
             var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
@@ -54,14 +52,18 @@ namespace App.Host.Write
                         x.IsolationLevel = IsolationLevel.ReadCommitted;
                     });
 
-                    e.Consumer(() => new WeatherForecastConsumer(db), c =>
-                    {
-
-                    });
+                    using var context = services.BuildServiceProvider().GetRequiredService<ApplicationReadDbContext>();
+                    e.Consumer(() => new WeatherForecastConsumer(context));
                 });
             });
+
+ 
+
             services.AddSingleton(busControl);
             services.AddSingleton<IBus>(busControl);
+            services.AddSingleton<IPublishEndpoint>(provider => provider.GetRequiredService<IBusControl>());
+            services.AddSingleton<ISendEndpointProvider>(provider => provider.GetRequiredService<IBusControl>());
+
             busControl.StartAsync();
         }
 

@@ -29,13 +29,17 @@ namespace App.Host.Read.Consumer
             }
             catch (TransactionAbortedException e)
             {
-                
+                Console.WriteLine(e);
+                throw;
             }
             catch (Exception e)
             {
-                scope.Dispose();
                 Console.WriteLine(e);
                 throw;
+            }
+            finally
+            {
+                scope.Dispose();
             }
         }
     }

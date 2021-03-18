@@ -31,7 +31,8 @@ namespace App.Host.Read.Context
             throw new InvalidOperationException("This context is read-only.");
         }
 
-        public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = new CancellationToken())
+        public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess,
+            CancellationToken cancellationToken = new CancellationToken())
         {
             throw new InvalidOperationException("This context is read-only.");
         }

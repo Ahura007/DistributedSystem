@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Common
 {
-    public class WeatherForecast : IWeatherForecast
+    public class WeatherForecast
     {
         public WeatherForecast()
         {
@@ -19,17 +19,5 @@ namespace Common
         public int TemperatureF => 32 + (int) (TemperatureC / 0.5556);
 
         public string Summary { get; set; }
-    }
-
-    public interface IWeatherForecast
-    {
-        int Id { get; set; }
-        DateTime Date { get; set; }
-
-        int TemperatureC { get; set; }
-
-        int TemperatureF { get; }
-
-        string Summary { get; set; }
     }
 }
