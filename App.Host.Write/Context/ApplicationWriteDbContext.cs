@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace App.Host.Write.Context
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationWriteDbContext : DbContext
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+        public ApplicationWriteDbContext(DbContextOptions<ApplicationWriteDbContext> options) : base(options)
         {
         }
 

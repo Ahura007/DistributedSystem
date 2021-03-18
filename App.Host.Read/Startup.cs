@@ -9,6 +9,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using App.Host.Read.Context;
+using Microsoft.EntityFrameworkCore;
 
 namespace App.Host.Read
 {
@@ -25,6 +27,11 @@ namespace App.Host.Read
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+
+            services.AddDbContext<ApplicationReadDbContext>(options =>
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -37,7 +44,7 @@ namespace App.Host.Read
 
             app.UseRouting();
 
-            app.UseAuthorization();
+ 
 
             app.UseEndpoints(endpoints =>
             {

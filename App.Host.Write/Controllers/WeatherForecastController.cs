@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using App.Host.Write.Context;
 using Common;
 using MassTransit;
@@ -11,25 +12,28 @@ namespace App.Host.Write.Controllers
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
     {
-        private readonly ApplicationDbContext _applicationDbContext;
+        private readonly ApplicationWriteDbContext _applicationWriteDbContext;
 
         private readonly IBus _bus;
 
         private readonly ILogger<WeatherForecastController> _logger;
+ 
 
         public WeatherForecastController(ILogger<WeatherForecastController> logger, IBus bus,
-            ApplicationDbContext applicationDbContext)
+            ApplicationWriteDbContext applicationWriteDbContext)
         {
             _logger = logger;
             _bus = bus;
-            _applicationDbContext = applicationDbContext;
+            _applicationWriteDbContext = applicationWriteDbContext;
         }
 
         [HttpPost]
         public async Task<WeatherForecast> PostAsync(WeatherForecast weatherForecast)
         {
-            await _applicationDbContext.WeatherForecasts.AddAsync(weatherForecast);
-            await _applicationDbContext.SaveChangesAsync();
+            //check business validation
+            await _applicationWriteDbContext.WeatherForecasts.AddAsync(weatherForecast);
+            await _applicationWriteDbContext.SaveChangesAsync();
+   
             await _bus.Publish<WeatherForecast>(weatherForecast);
             return weatherForecast;
         }
