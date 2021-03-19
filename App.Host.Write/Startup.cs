@@ -53,6 +53,7 @@ namespace App.Host.Write
                     });
 
                     using var context = services.BuildServiceProvider().GetRequiredService<ApplicationReadDbContext>();
+                   
                     e.Consumer(() => new WeatherForecastConsumer(context));
                 });
             });
@@ -61,8 +62,8 @@ namespace App.Host.Write
 
             services.AddSingleton(busControl);
             services.AddSingleton<IBus>(busControl);
-            services.AddSingleton<IPublishEndpoint>(provider => provider.GetRequiredService<IBusControl>());
-            services.AddSingleton<ISendEndpointProvider>(provider => provider.GetRequiredService<IBusControl>());
+            services.AddSingleton<IPublishEndpoint>(busControl);
+            services.AddSingleton<ISendEndpointProvider>(busControl);
 
             busControl.StartAsync();
         }

@@ -2,6 +2,8 @@
 using System.Threading.Tasks;
 using App.Host.Read.Context;
 using Common;
+using Common.Event;
+using Common.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;

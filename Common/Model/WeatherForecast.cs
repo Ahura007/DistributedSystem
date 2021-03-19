@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace Common
+namespace Common.Model
 {
     public class WeatherForecast
     {

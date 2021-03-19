@@ -3,6 +3,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using App.Host.Write.Context;
 using Common;
+using Common.Event;
+using Common.Model;
 using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -40,7 +42,13 @@ namespace App.Host.Write.Controllers
             await _applicationWriteDbContext.WeatherForecasts.AddAsync(weatherForecast, cancellationToken);
             await _applicationWriteDbContext.SaveChangesAsync(cancellationToken);
 
-            await _endpoint.Publish(weatherForecast, cancellationToken);
+            await _endpoint.Publish(new WeatherForecastAdded
+            {
+                Date = weatherForecast.Date,
+                Id = weatherForecast.Id,
+                Summary = weatherForecast.Summary,
+                TemperatureC = weatherForecast.TemperatureC
+            }, cancellationToken);
 
             return weatherForecast;
         }

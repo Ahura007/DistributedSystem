@@ -3,11 +3,13 @@ using System.Threading.Tasks;
 using System.Transactions;
 using App.Host.Read.Context;
 using Common;
+using Common.Event;
+using Common.Model;
 using MassTransit;
 
 namespace App.Host.Read.Consumer
 {
-    public class WeatherForecastConsumer : IConsumer<WeatherForecast>
+    public class WeatherForecastConsumer : IConsumer<WeatherForecastAdded>
     {
         private readonly ApplicationReadDbContext _applicationReadDbContext;
 
@@ -16,7 +18,7 @@ namespace App.Host.Read.Consumer
             _applicationReadDbContext = applicationReadDbContext;
         }
 
-        public async Task Consume(ConsumeContext<WeatherForecast> context)
+        public async Task Consume(ConsumeContext<WeatherForecastAdded> context)
         {
             TransactionContext transactionContext;
             context.TryGetPayload(out transactionContext);
@@ -36,10 +38,6 @@ namespace App.Host.Read.Consumer
             {
                 Console.WriteLine(e);
                 throw;
-            }
-            finally
-            {
-                scope.Dispose();
             }
         }
     }

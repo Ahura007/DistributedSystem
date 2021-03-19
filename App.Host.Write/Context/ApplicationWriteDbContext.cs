@@ -1,5 +1,7 @@
 ﻿using App.Host.Write.Controllers;
 using Common;
+using Common.Event;
+using Common.Model;
 using Microsoft.EntityFrameworkCore;
 
 namespace App.Host.Write.Context
