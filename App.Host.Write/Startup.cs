@@ -3,8 +3,8 @@ using System.Transactions;
 using App.Host.Read.Consumer;
 using App.Host.Read.Context;
 using App.Host.Write.Context;
+using GreenPipes;
 using MassTransit;
-using MassTransit.AspNetCoreIntegration;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -34,39 +34,47 @@ namespace App.Host.Write
             services.AddDbContext<ApplicationReadDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
+            ConfigureMasstransit(services);
 
-            var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
+
+        }
+
+
+
+        private void ConfigureMasstransit(IServiceCollection services)
+        {
+            services.AddMassTransit(c =>
             {
-                cfg.Host(new Uri("rabbitmq://localhost/"), h =>
-                {
-                    h.Username("guest");
-                    h.Password("guest");
-                });
+                c.AddConsumers(typeof(WeatherForecastConsumer).Assembly);
 
-
-                cfg.ReceiveEndpoint(e =>
+                c.AddBus(provider => Bus.Factory.CreateUsingRabbitMq(cfg =>
                 {
-                    e.UseTransaction(x =>
+                    cfg.Host(new Uri("rabbitmq://localhost/"), h =>
                     {
-                        x.Timeout = TimeSpan.FromSeconds(90);
-                        x.IsolationLevel = IsolationLevel.ReadCommitted;
+                        h.Username("guest");
+                        h.Password("guest");
                     });
 
-                    using var context = services.BuildServiceProvider().GetRequiredService<ApplicationReadDbContext>();
-                   
-                    e.Consumer(() => new WeatherForecastConsumer(context));
-                });
+                    cfg.ReceiveEndpoint(e =>
+                   {
+                       e.PrefetchCount = 16;
+                       e.UseMessageRetry(x => x.Interval(2, 100));
+                       e.ConfigureConsumers(provider);
+
+                       e.UseTransaction(x =>
+                       {
+                           x.Timeout = TimeSpan.FromSeconds(90);
+                           x.IsolationLevel = IsolationLevel.ReadCommitted;
+                       });
+
+                   });
+                }));
+
             });
-
- 
-
-            services.AddSingleton(busControl);
-            services.AddSingleton<IBus>(busControl);
-            services.AddSingleton<IPublishEndpoint>(busControl);
-            services.AddSingleton<ISendEndpointProvider>(busControl);
-
-            busControl.StartAsync();
+            services.AddSingleton<IHostedService, BusService>();
         }
+
+
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -74,7 +82,6 @@ namespace App.Host.Write
             if (env.IsDevelopment()) app.UseDeveloperExceptionPage();
 
             app.UseRouting();
-
 
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }
