@@ -34,14 +34,12 @@ namespace App.Host.Write
             services.AddDbContext<ApplicationReadDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
-            ConfigureMasstransit(services);
-
-
+            ConfigureMassTransit(services);
         }
+       
 
 
-
-        private void ConfigureMasstransit(IServiceCollection services)
+        private void ConfigureMassTransit(IServiceCollection services)
         {
             services.AddMassTransit(c =>
             {
@@ -56,24 +54,21 @@ namespace App.Host.Write
                     });
 
                     cfg.ReceiveEndpoint(e =>
-                   {
-                       e.PrefetchCount = 16;
-                       e.UseMessageRetry(x => x.Interval(2, 100));
-                       e.ConfigureConsumers(provider);
+                    {
+                        e.PrefetchCount = 16;
+                        e.UseMessageRetry(x => x.Interval(2, 100));
+                        e.ConfigureConsumers(provider);
 
-                       e.UseTransaction(x =>
-                       {
-                           x.Timeout = TimeSpan.FromSeconds(90);
-                           x.IsolationLevel = IsolationLevel.ReadCommitted;
-                       });
-
-                   });
+                        e.UseTransaction(x =>
+                        {
+                            x.Timeout = TimeSpan.FromSeconds(90);
+                            x.IsolationLevel = IsolationLevel.ReadCommitted;
+                        });
+                    });
                 }));
-
             });
             services.AddSingleton<IHostedService, BusService>();
         }
-
 
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
